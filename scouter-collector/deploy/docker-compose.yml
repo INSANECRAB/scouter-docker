@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  scouter-server:
+    image: <AWS Account ID>.dkr.ecr.<region>.amazonaws.com/<ECR Repo Name>:scouter_server_v2.15.0
+    container_name: scouter-server
+    restart: unless-stopped
+
+    ports:
+      - "6100:6100/tcp"
+      - "6100:6100/udp"
+      - "6180:6180"
+
+    volumes:
+      - ./data:/opt/scouter/server/data
+      - ./logs:/opt/scouter/server/logs
+      # 필요하면 conf 외부화도 가능
+      # - ./conf/scouter.conf:/opt/scouter/server/conf/scouter.conf
+
+    environment:
+      # JVM 튜닝은 Dockerfile 대신 여기서 주는 것도 가능
+      JAVA_OPTS: "-Xms512m -Xmx2048m"
+
+    # Dockerfile에서 USER scuser로 설정했으면 굳이 안 써도 됨
+    #user: "1001:2000"
+
+    healthcheck:
+      #test: ["CMD", "sh", "-c", "ss -lnt | grep 6180"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
